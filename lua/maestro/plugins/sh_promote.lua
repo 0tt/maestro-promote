@@ -1,3 +1,16 @@
+maestro.command("rankpromote", {"rank", "time:optional"}, function(caller, rank, time)
+	if not maestro.ranks[rank] then return true, "Invalid rank!" end
+	maestro.rankpromote(rank, time)
+	if time then
+		return false, "set the auto-promote time of %1 to %2"
+	end
+	return false, "disabled auto-promote for %1"
+end, [[
+Sets the playtime a player has to have to be promoted to this rank.
+Leave out the time to make remove promotion for the rank.
+]])
+
+if not CLIENT then return end
 local function escape(str)
 	str = str:gsub("<", "&lt;")
 	str = str:gsub(">", "&gt;")
@@ -18,13 +31,13 @@ end
 local jointime = CurTime()
 local cooldown = 0
 local lastply
-maestro.hook("Think", "maestro-tempo", function()
-    if not IsValid(maestro_tempo) then return end
+maestro.hook("Think", "maestro-promote", function()
+    if not IsValid(maestro_promote) then return end
 
-    local time = CurTime() - LocalPlayer():GetNWInt("maestro-tempo", CurTime())
+    local time = CurTime() - LocalPlayer():GetNWInt("maestro-promote", CurTime())
     local str = maestro.time(time, -5)
     local join = maestro.time(CurTime() - jointime, -5)
-    maestro_tempo:Call([[
+    maestro_promote:Call([[
 document.getElementById("panel-title").innerHTML = "Total: ]] .. abbr(str) .. [[<br>Current: ]] .. abbr(join) .. [[";
 ]])
 
@@ -35,32 +48,32 @@ document.getElementById("panel-title").innerHTML = "Total: ]] .. abbr(str) .. [[
         lastply = tr.Entity
     elseif cooldown <= 0 then
         lastply = nil
-        maestro_tempo:Call([[
+        maestro_promote:Call([[
 $('.collapse').collapse("hide");
 ]])
     end
     if IsValid(lastply) then
-        local plytime = abbr(maestro.time(CurTime() - lastply:GetNWInt("maestro-tempo", CurTime()), -5))
-        maestro_tempo:Call([[
+        local plytime = abbr(maestro.time(CurTime() - lastply:GetNWInt("maestro-promote", CurTime()), -5))
+        maestro_promote:Call([[
 $('.collapse').collapse("show");
 document.getElementById("panel-body").innerHTML = "Name: ]] .. lastply:Nick() .. [[<br>SteamID: ]] .. lastply:SteamID() .. [[<br>Total: ]] .. plytime .. [[";
 ]])
     end
 end)
 
-if maestro_tempo then
-    maestro_tempo:Remove()
+if maestro_promote then
+    maestro_promote:Remove()
 end
-timer.Create("maestro_tempo", 1, 0, function()
-	maestro_tempo = vgui.Create("DHTML")
-	if not maestro_tempo then
+timer.Create("maestro_promote", 1, 0, function()
+	maestro_promote = vgui.Create("DHTML")
+	if not maestro_promote then
 		return
 	else
-		timer.Remove("maestro_tempo")
+		timer.Remove("maestro_promote")
 	end
-	maestro_tempo:SetSize(280, 180)
-	maestro_tempo:SetPos(ScrW() - 280 - 40, 180)
-	maestro_tempo:SetHTML([[
+	maestro_promote:SetSize(280, 180)
+	maestro_promote:SetPos(ScrW() - 280 - 40, 180)
+	maestro_promote:SetHTML([[
 <!DOCTYPE html>
 <html lang="en">
 <head>
