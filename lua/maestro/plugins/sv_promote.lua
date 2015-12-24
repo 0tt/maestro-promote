@@ -57,7 +57,7 @@ end
 
 local promote = {}
 maestro.load("promote", function(ret, newfile)
-    promote = ret
+    promote = ret or {}
 end)
 function maestro.rankpromote(name, time)
     promote[name] = time
