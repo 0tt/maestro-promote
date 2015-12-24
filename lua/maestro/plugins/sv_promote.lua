@@ -33,12 +33,6 @@ if mysql then
         end
     end)
     maestro.hook("PlayerDisconnected", "maestro-promote", function(ply)
-        times[ply] = times[ply] or CurTime()
-        local time = CurTime() - times[ply]
-        local q = mysql:Update("maestro_promote")
-            q:Update("time", math.floor(time))
-            q:Where("id", v:SteamID())
-        q:Execute()
         times[ply] = nil
     end)
 else
