@@ -1,19 +1,19 @@
 local times = {}
 if mysql then
     local q = mysql:Create("maestro_promote")
-        q:Create("id", "VARCHAR(32) NOT NULL")
+        q:Create("id", "BIGINT NOT NULL")
         q:Create("time", "INT NOT NULL")
     q:Execute()
     maestro.hook("PlayerInitialSpawn", "maestro-promote", function(ply)
         local s = mysql:Select("maestro_promote")
-            s:Where("id", ply:SteamID())
+            s:Where("id", ply:SteamID64())
             s:Callback(function(res, status, id)
                 if type(res) == "table" and #res > 0 then
                     times[ply] = CurTime() - res[1].time
                     ply:SetNWInt("maestro-promote", times[ply])
                 else
                     local q = mysql:Insert("maestro_promote")
-                        q:Insert("id", ply:SteamID())
+                        q:Insert("id", ply:SteamID64())
                         q:Insert("time", math.floor(ply:GetPData("maestro-promote", 0)))
                     q:Execute()
                     times[ply] = CurTime() - ply:GetPData("maestro-promote", 0)
@@ -28,7 +28,7 @@ if mysql then
             local time = CurTime() - times[v]
             local q = mysql:Update("maestro_promote")
                 q:Update("time", math.floor(time))
-                q:Where("id", v:SteamID())
+                q:Where("id", v:SteamID64())
             q:Execute()
         end
     end)
